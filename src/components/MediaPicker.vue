@@ -38,8 +38,13 @@
               class="thumbnail"
               v-if="file.type.startsWith('image')"
             />
-            <div v-if="file.type.startsWith('video')">
-              <video id="video-element" currentTime="2" allowfulscreen>
+            <div
+              v-if="file.type.startsWith('video')"
+              class="video-container"
+              @click="playVideo(file.url)"
+            >
+              <img src="../assets/play.webp" alt="" class="btn-play" />
+              <video id="video-element" currentTime="50" allowfulscreen>
                 <source :src="file.url" type="video/mp4" />
               </video>
             </div>
@@ -95,6 +100,9 @@ export default {
           };
         })
       );
+    },
+    playVideo(url) {
+      console.log(url);
     },
 
     removeFile(index) {
@@ -243,15 +251,30 @@ h3 span {
   margin-bottom: 1.5rem;
 }
 .output-container .thumbnail {
-  height: 100px;
-  width: 100px;
+  height: 80px;
+  width: 80px;
   border-radius: 0.5rem;
   object-fit: cover;
 }
 
+.video-container {
+  position: relative;
+}
+
+.btn-play {
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 #video-element {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
+  object-fit: fill;
+  border-radius: 0.5rem;
 }
 
 .output-container .file-info {
