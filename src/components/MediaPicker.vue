@@ -2,8 +2,15 @@
   <main class="container">
     <h3><span>Upload</span> Files</h3>
     <div class="main-content">
-      <div class="dropzone">
-        <div class="dropzone-text">
+      <div
+        class="dropzone"
+        @dragenter.prevent="toggleActive"
+        @dragleave.prevent="toggleActive"
+        @dragover.prevent
+        @drop.prevent="uploadFiles($event)"
+        :class="{ 'active-dropzone': active }"
+      >
+        <div class="dropzone-text" :class="{ 'hide-text': active }">
           <h4>Drop your files here.</h4>
           <span>or</span>
           <label for="files" class="upload-btn">Browse</label>
@@ -13,12 +20,18 @@
           multiple
           id="files"
           @change="uploadFiles($event)"
-          accept="image/png, image/gif, image/jpeg, video/*"
+          accept="image/*, video/*, application/*"
         />
       </div>
       <div class="output-container">
         <ul class="files-list" v-if="files.length > 0">
           <li class="file-detail" v-for="(file, index) in files" :key="index">
+            <img
+              v-if="file.type.startsWith('application')"
+              src="../assets/file.png"
+              alt="File Image"
+              class="thumbnail"
+            />
             <img
               :src="file.url"
               alt="thumbnail"
@@ -54,18 +67,30 @@ export default {
   data() {
     return {
       files: [],
+      active: false,
     };
   },
 
   methods: {
+    toggleActive() {
+      this.active = !this.active;
+    },
+
     uploadFiles(e) {
-      const files = Array.from(e.target.files);
+      let imagesRaw = [];
+
+      if (e.dataTransfer) {
+        this.toggleActive();
+        imagesRaw = Array.from(e.dataTransfer.files);
+      } else {
+        imagesRaw = Array.from(e.target.files);
+      }
       this.files.push(
-        ...files.map((file) => {
+        ...imagesRaw.map((file) => {
           return {
             name: file.name,
             type: file.type,
-            size: file.size / 1000,
+            size: `${(file.size / 1000 / 1000).toFixed(1)} MB`,
             url: URL.createObjectURL(file),
           };
         })
@@ -115,6 +140,10 @@ h3 span {
   flex: 1;
 }
 
+.hide-text {
+  display: none;
+}
+
 .dropzone {
   position: relative;
   margin-right: 4rem;
@@ -134,6 +163,10 @@ h3 span {
   z-index: 1;
   border-radius: 1.5rem;
   border: 2px dashed #0b6adc;
+}
+
+.dropzone.active-dropzone::after {
+  opacity: 0.7;
 }
 
 .dropzone-text {
