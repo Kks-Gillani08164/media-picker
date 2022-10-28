@@ -38,16 +38,18 @@
               class="thumbnail"
               v-if="file.type.startsWith('image')"
             />
-            <div
-              v-if="file.type.startsWith('video')"
-              class="video-container"
-              @click="playVideo(file.url)"
-            >
-              <img src="../assets/play.webp" alt="" class="btn-play" />
-              <video id="video-element" currentTime="50" allowfulscreen>
-                <source :src="file.url" type="video/mp4" />
-              </video>
-            </div>
+            <a :href="file.url" target="_blank">
+              <div
+                v-if="file.type.startsWith('video')"
+                class="video-container"
+                @click="playVideo(file.url)"
+              >
+                <img src="../assets/play.webp" alt="" class="btn-play" />
+                <video id="video-element" currentTime="50" allowfulscreen>
+                  <source :src="file.url" type="video/mp4" />
+                </video>
+              </div>
+            </a>
             <div class="file-info">
               <p><span>Name:</span> {{ file.name }}</p>
               <p><span>Type:</span> {{ file.type }}</p>
@@ -95,18 +97,29 @@ export default {
           return {
             name: file.name,
             type: file.type,
-            size: `${(file.size / 1000 / 1000).toFixed(1)} MB`,
+            size: `${
+              file.size / 1000 / 1000 > 1
+                ? (file.size / 1000 / 1000).toFixed(1) + " MB"
+                : (file.size / 1000).toFixed(2) + " KB"
+            }
+            `,
             url: URL.createObjectURL(file),
           };
         })
       );
     },
-    playVideo(url) {
-      console.log(url);
-    },
 
     removeFile(index) {
       this.files.splice(index, 1);
+    },
+  },
+
+  watch: {
+    files: {
+      handler(newValue) {
+        this.$emit("FilesUpdated", newValue);
+      },
+      deep: true,
     },
   },
 };
@@ -259,21 +272,21 @@ h3 span {
 
 .video-container {
   position: relative;
+  cursor: pointer;
 }
 
 .btn-play {
   position: absolute;
-  height: 40px;
-  width: 40px;
+  height: 30px;
+  width: 30px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
 #video-element {
-  width: 80px;
-  height: 80px;
-  object-fit: fill;
+  width: 100px;
+  height: 100px;
   border-radius: 0.5rem;
 }
 
